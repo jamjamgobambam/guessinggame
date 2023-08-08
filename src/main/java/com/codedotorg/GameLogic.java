@@ -12,37 +12,81 @@ public class GameLogic {
     private static int guess = (left + right) / 2;
 
     /**
-     * Performs a binary search based on the user's response.
-     * If the user responds with "thumbsup", the guess is too low and the left boundary is updated.
-     * If the user responds with "thumbsdown", the guess is too high and the right boundary is updated.
-     * If the user responds with "stop", the current guess is returned.
-     * If the user responds with anything else, -1 is returned.
-     *
-     * @param userResponse the user's response to the current guess
-     * @return the next guess or -1 if the user's response is invalid
+     * Performs a binary search based on the user's response to a guess.
+     * @param predictedClass the predicted class returned by the model
+     * @return an integer representing the next guess to make (-1 if the user's response is invalid)
      */
     public static int binarySearch(String predictedClass) {
         // Get the predicted class without the leading number
         String userResponse = predictedClass.substring(predictedClass.indexOf(" ") + 1);
 
+        // Make a higher guess
         if (userResponse.equals("thumbsup")) {
-            left = guess;
-            guess = (left + right) / 2;
-            return guess;
+            return guessHigher();
         }
+        // Make a lower guess
         else if (userResponse.equals("thumbsdown")) {
-            right = guess;
-            guess = (left + right) / 2;
-            return guess;
+            return guessLower();
         }
+        // Guess is correct
         else if (userResponse.equals("stop")) {
-            return guess;
+            return guessCorrect();
         }
+        // User response is invalid
         else {
             return -1;
         }
     }
 
+    /**
+     * Returns the next guess by assuming the number is higher than the current guess.
+     * Updates the left boundary of the search space to be the current guess.
+     * The next guess is the number in the middle of the left and right boundaries.
+     * @return the next guess
+     */
+    public static int guessHigher() {
+        // Set the left boundary to the current guess
+        left = guess;
+
+        // Set guess to the value in the middle of the left and right boundaries
+        guess = (left + right) / 2;
+
+        // Return the guess
+        return guess;
+    }
+
+    /**
+     * Calculates the next guess by setting the current guess as the upper bound and
+     * gets the middle of the lower and upper bounds as the new guess.
+     *
+     * @return the new guess
+     */
+    public static int guessLower() {
+        // Set the right boundary to the current guess
+        right = guess;
+
+        // Set guess to the value in the middle of the left and right boundaries
+        guess = (left + right) / 2;
+
+        // Return the guess
+        return guess;
+    }
+
+    /**
+     * Returns the correct guess.
+     * @return the correct guess
+     */
+    public static int guessCorrect() {
+        return guess;
+    }
+
+    /**
+     * Returns a String containing the predicted class and confidence score.
+     * 
+     * @param predictedClass the predicted class with a leading number
+     * @param predictedScore the confidence score of the predicted class
+     * @return a String containing the predicted class and confidence score
+     */
     public static String getUserResponse(String predictedClass, double predictedScore) {
         // Get the predicted class without the leading number
         String userResponse = predictedClass.substring(predictedClass.indexOf(" ") + 1);

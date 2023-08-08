@@ -6,7 +6,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -39,7 +38,8 @@ public class MainScene {
 
     /**
      * Constructs a new MainScene object.
-     * Initializes the cameraView, progress, exitButton, titleLabel, computerGuessLabel, predictionLabel, promptLabel, and cameraLoadingLabel.
+     * Initializes the cameraView, progress, exitButton, titleLabel, computerGuessLabel,
+     * predictionLabel, promptLabel, and cameraLoadingLabel.
      */
     public MainScene() {
         cameraView = new ImageView();
@@ -54,8 +54,7 @@ public class MainScene {
         predictionLabel = new Label("");
         promptLabel = new Label("Think of a number between 1 and 100!");
 
-        cameraLoading = new Loading();
-        
+        cameraLoading = new Loading();   
     }
 
     /**
@@ -65,6 +64,24 @@ public class MainScene {
      */
     public ImageView getCameraView() {
         return cameraView;
+    }
+
+    /**
+     * Returns the root layout.
+     * 
+     * @return the VBox for the root layout
+     */
+    public VBox getRootLayout() {
+        return rootLayout;
+    }
+
+    /**
+     * Returns the loading animation
+     * 
+     * @return the Loading object for the loading animation
+     */
+    public Loading getLoadingAnimation() {
+        return cameraLoading;
     }
 
     /**
@@ -125,7 +142,8 @@ public class MainScene {
     }
 
     /**
-     * Sets the action for the exit button. When clicked, it stops the camera capture and exits the program.
+     * Sets the action for the exit button. When clicked, it
+     * stops the camera capture and exits the program.
      */
     private void createExitButtonAction(CameraController cameraController) {
         exitButton.setOnAction(e -> {

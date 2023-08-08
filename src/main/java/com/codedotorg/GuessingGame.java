@@ -57,25 +57,42 @@ public class GuessingGame {
 
     
     /**
-     * Displays the main screen of the game, which includes the camera view and the computer's guess.
-     * Calls createMainScreen() to create the main screen to show, sets the scene to the window and shows it.
-     * Starts capturing the webcam, initially hides the camera view and shows the loading animation.
-     * Updates the prediction and computer's guess.
+     * Displays the main screen of the game, which includes the camera view
+     * and the computer's guess. Calls createMainScreen() to create the main
+     * screen to show, sets the scene to the window and shows it. Starts
+     * capturing the webcam, initially hides the camera view and shows the
+     * loading animation. Updates the prediction and computer's guess.
      */
     public void showMainScreen() {
+        // Create a new Scene object
         Scene mainScene = game.createMainScene(cameraController);
+
+        // Set mainScene as the active scene in the window
         window.setScene(mainScene);
+
+        // Display the window
         window.show();
+
+        // Capture the camera view and set the model for the cameraController object
         cameraController.captureCamera(game.getCameraView(), model);
-        game.showLoadingAnimation();
+
+        // Retrieve the Loading object
+        Loading cameraLoading = game.getLoadingAnimation();
+
+        // Show the loading animation while the camera is loading
+        cameraLoading.showLoadingAnimation(game.getCameraView());
+
+        // Update the game results
         updateGameResults();
     }
 
     /**
-     * Updates the game results by getting the predicted class and score from the CameraController,
-     * removing the loading animation and showing the camera view, updating the label to prompt the user
-     * to think of a number, getting the result of the user's response, updating the prediction label with
-     * the predicted class and confidence score, and updating the computer guess label.
+     * Updates the game results by getting the predicted class and score
+     * from the CameraController, removing the loading animation and
+     * showing the camera view, updating the label to prompt the user to
+     * think of a number, getting the result of the user's response, updating
+     * the prediction label with the predicted class and confidence score,
+     * and updating the computer guess label.
      */
     private void updateGameResults() {
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
@@ -84,8 +101,11 @@ public class GuessingGame {
             double predictedScore = cameraController.getPredictedScore();
 
             if (predictedClass != null) {
+                // Retrieve the Loading object
+                Loading cameraLoading = game.getLoadingAnimation();
+
                 // Remove the loading animation and show the camera view
-                game.hideLoadingAnimation();
+                cameraLoading.hideLoadingAnimation(game.getRootLayout(), game.getCameraView());
 
                 // Update the label to prompt the user to think of a number
                 game.setPromptLabelText("Higher, Lower, or Correct?");
@@ -108,8 +128,9 @@ public class GuessingGame {
     }
 
     /**
-     * Updates the computer guess label with the result of a binary search on the predicted class.
-     * Waits for 3 seconds before updating the label to give the user time to see the previous guess.
+     * Updates the computer guess label with the result of a binary search
+     * on the predicted class. Waits for 3 seconds before updating the label
+     * to give the user time to see the previous guess.
      *
      * @param predictedClass the predicted class to search for
      */

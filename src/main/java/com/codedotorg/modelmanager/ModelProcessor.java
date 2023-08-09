@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.List;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.tensorflow.Graph;
+import org.tensorflow.Operation;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
@@ -56,6 +59,53 @@ public class ModelProcessor {
             System.err.println("Failed to load the model");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Returns the name of the input node in the TensorFlow model.
+     *
+     * @return The name of the input node.
+     */
+    public String getInputNodeName() {
+        String inputNodeName = "";
+
+        Graph graph = bundle.graph();
+        Iterator<Operation> operations = graph.operations();
+
+        while (operations.hasNext()) {
+            Operation operation = operations.next();
+
+            if (operation.name().contains("input")) {
+                inputNodeName = operation.name();
+            }
+        }
+
+        return inputNodeName;
+    }
+
+    /**
+     * Returns the name of the output node of the TensorFlow model.
+     * The output node is determined by finding the first operation in the graph that contains the string "input" in its name,
+     * and then returning the name of the next operation in the graph.
+     *
+     * @return The name of the output node of the TensorFlow model.
+     */
+    public String getOutputNodeName() {
+        String outputNodeName = "";
+
+        Graph graph = bundle.graph();
+        Iterator<Operation> operations = graph.operations();
+
+        while (operations.hasNext()) {
+            Operation operation = operations.next();
+
+            if (operation.name().contains("input")) {
+                Operation outputOperation = operations.next();
+                outputNodeName = outputOperation.name();
+            }
+        }
+
+        return outputNodeName;
     }
 
     /**

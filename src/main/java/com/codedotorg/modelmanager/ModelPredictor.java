@@ -25,8 +25,8 @@ public class ModelPredictor {
      */
     public float[] predict(Tensor<Float> tensorInput) {
         // The name of the input node and output node may vary based on your model. Adjust accordingly.
-        String inputNodeName = "serving_default_sequential_1_input";
-        String outputNodeName = "StatefulPartitionedCall:0";
+        String inputNodeName = modelProcessor.getInputNodeName();
+        String outputNodeName = modelProcessor.getOutputNodeName() + ":0";
 
         try (Tensor<Float> result = modelProcessor.getSession().runner()
                 .feed(inputNodeName, tensorInput)

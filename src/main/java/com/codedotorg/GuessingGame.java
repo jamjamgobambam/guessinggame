@@ -4,7 +4,6 @@ import com.codedotorg.modelmanager.CameraController;
 import com.codedotorg.modelmanager.ModelManager;
 
 import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.Scene;

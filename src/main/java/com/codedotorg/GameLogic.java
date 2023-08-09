@@ -20,22 +20,39 @@ public class GameLogic {
         // Get the predicted class without the leading number
         String userResponse = predictedClass.substring(predictedClass.indexOf(" ") + 1);
 
-        // Make a higher guess
-        if (userResponse.equals("thumbsup")) {
-            return guessHigher();
+        if (!isGuessCorrect(predictedClass)) {
+            if (userResponse.equals("thumbsup")) {
+                return guessHigher();
+            }
+            else if (userResponse.equals("thumbsdown")) {
+                return guessLower();
+            }
+            else if (userResponse.equals("neutral")) {
+                return guess;
+            }
+            else {
+                return -1;
+            }
         }
-        // Make a lower guess
-        else if (userResponse.equals("thumbsdown")) {
-            return guessLower();
-        }
-        // Guess is correct
-        else if (userResponse.equals("stop")) {
-            return guessCorrect();
-        }
-        // User response is invalid
         else {
-            return -1;
+            return guess;
         }
+    }
+
+    /**
+     * Checks if the user's guess is correct.
+     * @param predictedClass the user's predicted class
+     * @return true if the user's guess is "stop", false otherwise
+     */
+    public static boolean isGuessCorrect(String predictedClass) {
+        // Get the predicted class without the leading number
+        String userResponse = predictedClass.substring(predictedClass.indexOf(" ") + 1);
+
+        if (userResponse.equals("stop")) {
+            return true;
+        }
+        
+        return false;
     }
 
     /**
@@ -91,11 +108,20 @@ public class GameLogic {
         // Get the predicted class without the leading number
         String userResponse = predictedClass.substring(predictedClass.indexOf(" ") + 1);
 
+        // Convert the predicted score to an integer percentage
+        int confidencePercentage = (int)(predictedScore * 100);
+
         // Create a String containing the result of the predicted class and confidence score
-        String userResult = "User: " + userResponse + " (" + predictedScore + " Confidence)";
+        String userResult = "User: " + userResponse + " (" + confidencePercentage + "% Confidence)";
 
         // Return the String
         return userResult;
+    }
+
+    public static void resetGame() {
+        left = 0;
+        right = 100;
+        guess = (left + right) / 2;
     }
 
 }

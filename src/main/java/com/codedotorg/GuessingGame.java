@@ -116,6 +116,11 @@ public class GuessingGame {
                 // Update the prediction label with the predicted class and confidence score
                 Platform.runLater(() -> game.setPredictionLabelText(userResult));
 
+                if (GameLogic.isGuessCorrect(predictedClass)) {
+                    int result = GameLogic.binarySearch(predictedClass);
+                    window.setScene(game.correctGuessScene(result, window, cameraController));
+                }
+
                 updateComputerGuessLabel(predictedClass);
             }
         }));

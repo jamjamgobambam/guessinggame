@@ -3,12 +3,14 @@ package com.codedotorg;
 import com.codedotorg.modelmanager.CameraController;
 
 import javafx.geometry.Pos;
+import javafx.scene.Camera;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class MainScene {
     
@@ -36,6 +38,9 @@ public class MainScene {
     /** The loading animation while the camera is loading */
     private Loading cameraLoading;
 
+    /** Button to play the game again */
+    private Button playAgainButton;
+
     /**
      * Constructs a new MainScene object.
      * Initializes the cameraView, progress, exitButton, titleLabel, computerGuessLabel,
@@ -46,6 +51,7 @@ public class MainScene {
         cameraView.setId("camera");
 
         exitButton = new Button("Exit");
+        playAgainButton = new Button("Play Again");
         
         titleLabel = new Label("Guessing Game");
         titleLabel.setId("titleLabel");
@@ -104,8 +110,8 @@ public class MainScene {
         Region buttonSpacer = createSpacer(10);
 
         // Add the title label, prompt label, loading animation, camera view, prediction label, and exit button to the layout
-        rootLayout.getChildren().addAll(titleLabel, promptLabel, cameraLoading.getCameraLoadingLabel(), cameraSpacer1, cameraView, cameraSpacer2,
-            cameraLoading.getProgressIndicator(), computerGuessLabel, predictionLabel, buttonSpacer, exitButton);
+        rootLayout.getChildren().addAll(titleLabel, promptLabel, cameraLoading.getCameraLoadingLabel(),
+            cameraSpacer1, cameraView, cameraSpacer2, cameraLoading.getProgressIndicator(), computerGuessLabel, predictionLabel, buttonSpacer, exitButton);
 
         // Creates a new scene and set the layout as its root
         Scene mainScene = new Scene(rootLayout, 600, 750);
@@ -141,14 +147,47 @@ public class MainScene {
         computerGuessLabel.setText(text);
     }
 
+    public void resetGame(Stage primaryStage, CameraController cameraController) {
+        // Reset the game logic
+        GameLogic.resetGame();
+
+        // Restore the game scene
+        Scene mainScene = createMainScene(cameraController);
+        primaryStage.setScene(mainScene);
+    }
+
+    public Scene correctGuessScene(int correctNumber, Stage primaryStage, CameraController cameraController) {
+        // Sets the action for when the play again button is clicked
+        createPlayAgainButtonAction(primaryStage, cameraController);
+
+        VBox layout = new VBox(20);
+        layout.setAlignment(Pos.CENTER);
+    
+        Label correctNumberLabel = new Label("Correct Number: " + correctNumber);
+        Label successMessage = new Label("The computer guessed the number!");
+        
+        layout.getChildren().addAll(correctNumberLabel, successMessage, playAgainButton);
+        
+        Scene correctGuessScene = new Scene(layout, 600, 750);
+        correctGuessScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+    
+        return correctGuessScene;
+    }
+
     /**
      * Sets the action for the exit button. When clicked, it
      * stops the camera capture and exits the program.
      */
     private void createExitButtonAction(CameraController cameraController) {
-        exitButton.setOnAction(e -> {
+        exitButton.setOnAction(event -> {
             cameraController.stopCapture();
             System.exit(0);
+        });
+    }
+
+    private void createPlayAgainButtonAction(Stage primaryStage, CameraController cameraController) {
+        playAgainButton.setOnAction(event -> {
+            resetGame(primaryStage, cameraController);
         });
     }
 

@@ -66,11 +66,14 @@ public class CameraController {
                     // Update the image displayed in the image view
                     Platform.runLater(() -> imageView.setImage(img));
 
-                    // Get the predicted class from the model
-                    predictedClass = model.predictClass(frame);
+                    // Get the predicted result from the model
+                    Prediction result = model.processFrameAndGetClassNameWithConfidence(frame);
 
-                    // Get the predicted score from the model
-                    predictedScore = model.predictScore(frame);
+                    // Get the predicted class from the result
+                    predictedClass = result.getClassName();
+
+                    // Get the predicted score from the result
+                    predictedScore = result.getConfidence();
                 }
                 else {
                     System.out.println("Cannot capture the frame.");

@@ -116,11 +116,7 @@ public class GuessingGame {
                 // Update the prediction label with the predicted class and confidence score
                 Platform.runLater(() -> game.setPredictionLabelText(userResult));
 
-                if (GameLogic.isGuessCorrect(predictedClass)) {
-                    int result = GameLogic.binarySearch(predictedClass);
-                    window.setScene(game.correctGuessScene(result, window, cameraController));
-                }
-
+                // Update the label with the computer's guess
                 updateComputerGuessLabel(predictedClass);
             }
         }));
@@ -133,24 +129,26 @@ public class GuessingGame {
     }
 
     /**
-     * Updates the computer guess label with the result of a binary search
-     * on the predicted class. Waits for 3 seconds before updating the label
-     * to give the user time to see the previous guess.
+     * Updates the computer guess label with the result
+     * of a binary search on the predicted class.
      *
      * @param predictedClass the predicted class to search for
      */
     private void updateComputerGuessLabel(String predictedClass) {
-        PauseTransition delay = new PauseTransition(Duration.seconds(3));
+        // Get the result of the computer's guess
+        int result = GameLogic.binarySearch(predictedClass);
 
-        delay.setOnFinished(event -> {
-            // Get the result of the computer's guess
-            String computerGuess = "Computer Guess: " + GameLogic.binarySearch(predictedClass);
+        // End the game if the guess is correct
+        if (GameLogic.isGuessCorrect(predictedClass)) {
+            window.setScene(game.correctGuessScene(result, window, cameraController));
+        }
+        else {
+            // Create a String with the computer's guess
+            String computerGuess = "Computer Guess: " + result;
 
             // Update the computer guess label with the number the computer guessed
             Platform.runLater(() -> game.setComputerGuessLabel(computerGuess));
-        });
-
-        delay.play();
+        }
     }
 
 }

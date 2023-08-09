@@ -13,6 +13,7 @@ public class GameLogic {
 
     /**
      * Performs a binary search based on the user's response to a guess.
+     * 
      * @param predictedClass the predicted class returned by the model
      * @return an integer representing the next guess to make (-1 if the user's response is invalid)
      */
@@ -41,6 +42,7 @@ public class GameLogic {
 
     /**
      * Checks if the user's guess is correct.
+     * 
      * @param predictedClass the user's predicted class
      * @return true if the user's guess is "stop", false otherwise
      */
@@ -59,6 +61,7 @@ public class GameLogic {
      * Returns the next guess by assuming the number is higher than the current guess.
      * Updates the left boundary of the search space to be the current guess.
      * The next guess is the number in the middle of the left and right boundaries.
+     * 
      * @return the next guess
      */
     public static int guessHigher() {
@@ -91,6 +94,7 @@ public class GameLogic {
 
     /**
      * Returns the correct guess.
+     * 
      * @return the correct guess
      */
     public static int guessCorrect() {
@@ -118,6 +122,10 @@ public class GameLogic {
         return userResult;
     }
 
+    /**
+     * Resets the game by setting the left boundary to 0, the right boundary to 100,
+     * and the guess to the midpoint of the boundaries.
+     */
     public static void resetGame() {
         left = 0;
         right = 100;

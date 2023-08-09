@@ -147,6 +147,12 @@ public class MainScene {
         computerGuessLabel.setText(text);
     }
 
+    /**
+     * Resets the game by resetting the game logic and restoring the game scene.
+     * 
+     * @param primaryStage the primary stage of the application
+     * @param cameraController the camera controller used in the game
+     */
     public void resetGame(Stage primaryStage, CameraController cameraController) {
         // Reset the game logic
         GameLogic.resetGame();
@@ -156,21 +162,29 @@ public class MainScene {
         primaryStage.setScene(mainScene);
     }
 
+    /**
+     * Returns a Scene object that displays a message indicating that the computer has guessed the correct number.
+     * 
+     * @param correctNumber The correct number that the computer has guessed.
+     * @param primaryStage The primary stage of the JavaFX application.
+     * @param cameraController The CameraController object used to control the camera in the 3D scene.
+     * @return A Scene object that displays a message indicating that the computer has guessed the correct number.
+     */
     public Scene correctGuessScene(int correctNumber, Stage primaryStage, CameraController cameraController) {
         // Sets the action for when the play again button is clicked
         createPlayAgainButtonAction(primaryStage, cameraController);
 
         VBox layout = new VBox(20);
         layout.setAlignment(Pos.CENTER);
-    
+
         Label correctNumberLabel = new Label("Correct Number: " + correctNumber);
         Label successMessage = new Label("The computer guessed the number!");
-        
-        layout.getChildren().addAll(correctNumberLabel, successMessage, playAgainButton);
-        
+
+        layout.getChildren().addAll(correctNumberLabel, successMessage, playAgainButton, exitButton);
+
         Scene correctGuessScene = new Scene(layout, 600, 750);
         correctGuessScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-    
+
         return correctGuessScene;
     }
 

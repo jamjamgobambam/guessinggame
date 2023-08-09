@@ -10,6 +10,7 @@ public class Prediction {
 
     /**
      * Constructs a Prediction object with the given class name and confidence value.
+     * 
      * @param className the name of the predicted class
      * @param confidence the confidence value of the prediction
      */
@@ -20,6 +21,7 @@ public class Prediction {
 
     /**
      * Returns the name of the class.
+     * 
      * @return the name of the class
      */
     public String getClassName() {
@@ -28,6 +30,7 @@ public class Prediction {
 
     /**
      * Returns the confidence level of the prediction.
+     * 
      * @return the confidence level as a float value
      */
     public float getConfidence() {

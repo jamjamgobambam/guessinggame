@@ -30,7 +30,10 @@ public class CameraController {
         // Load the OpenCV library locally
         nu.pattern.OpenCV.loadLocally();
 
+        // Set predictedClass to null at start
         predictedClass = null;
+
+        // Set predictedScore to 0 at start
         predictedScore = 0;
     }
 
@@ -41,10 +44,8 @@ public class CameraController {
      * @param model the ModelManager to use for predicting the class and score of the captured frames
      */
     public void captureCamera(ImageView imageView, ModelManager model) {
-        // Create a new thread to run the camera capture
-        // Ensures that the camera capture runs in a separate thread from the main thread
-        // of the app to prevent the camera capture from blocking the main thread and
-        // causing the app to become unresponsive
+        // Create a new thread to run the camera capture to prevent the camera from
+        // from blocking the main thread and causing the app to become unresponsive
         new Thread(() -> {
             // Create a VideoCapture with the system default camera (0)
             VideoCapture camera = new VideoCapture(0);
@@ -67,7 +68,7 @@ public class CameraController {
                     Platform.runLater(() -> imageView.setImage(img));
 
                     // Get the predicted result from the model
-                    Prediction result = model.processFrameAndGetClassNameWithConfidence(frame);
+                    Prediction result = model.getPrediction(frame);
 
                     // Get the predicted class from the result
                     predictedClass = result.getClassName();

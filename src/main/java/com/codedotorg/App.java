@@ -10,8 +10,8 @@ public class App extends Application {
     }
 
     public void start(Stage primaryStage) {
-        GuessingGame game = new GuessingGame();
-        game.startApp(primaryStage);
+        GuessingGame game = new GuessingGame(primaryStage);
+        game.playGame();
     }
 
 }

@@ -2,6 +2,7 @@ package com.codedotorg;
 
 import com.codedotorg.modelmanager.CameraController;
 
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -9,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 public class MainScene {
     
@@ -37,20 +37,19 @@ public class MainScene {
     /** The loading animation while the camera is loading */
     private Loading cameraLoading;
 
-    /** Button to play the game again */
-    private Button playAgainButton;
+    /** Whether or not this is the first time the camera has loaded */
+    private boolean firstCapture;
 
     /**
      * Constructs a new MainScene object.
      * Initializes the cameraView, progress, exitButton, titleLabel, computerGuessLabel,
-     * predictionLabel, promptLabel, and cameraLoadingLabel.
+     * predictionLabel, promptLabel, cameraLoadingLabel, and firstCapture.
      */
     public MainScene() {
         cameraView = new ImageView();
         cameraView.setId("camera");
 
         exitButton = new Button("Exit");
-        playAgainButton = new Button("Play Again");
         
         titleLabel = new Label("Guessing Game");
         titleLabel.setId("titleLabel");
@@ -59,7 +58,8 @@ public class MainScene {
         predictionLabel = new Label("");
         promptLabel = new Label("Think of a number between 1 and 100!");
 
-        cameraLoading = new Loading();   
+        cameraLoading = new Loading();
+        firstCapture = true;
     }
 
     /**
@@ -69,15 +69,6 @@ public class MainScene {
      */
     public ImageView getCameraView() {
         return cameraView;
-    }
-
-    /**
-     * Returns the root layout.
-     * 
-     * @return the VBox for the root layout
-     */
-    public VBox getRootLayout() {
-        return rootLayout;
     }
 
     /**
@@ -91,6 +82,7 @@ public class MainScene {
 
     /**
      * Creates the main screen of the game.
+     * 
      * @return the main scene of the game
      */
     public Scene createMainScene(CameraController cameraController) {
@@ -121,70 +113,19 @@ public class MainScene {
     }
 
     /**
-     * Sets the text of the prompt label to the given text.
+     * Returns whether this is the first capture of the game.
      * 
-     * @param text the text to set as the prompt label's text
+     * @return true if this is the first capture, false otherwise.
      */
-    public void setPromptLabelText(String text) {
-        promptLabel.setText(text);
+    public boolean isFirstCapture() {
+        return firstCapture;
     }
-
+    
     /**
-     * Sets the text of the prediction label to the given text.
-     * 
-     * @param text the text to set the prediction label to
+     * Sets the boolean value of firstCapture to false.
      */
-    public void setPredictionLabelText(String text) {
-        predictionLabel.setText(text);
-    }
-
-    /**
-     * Sets the text of the computerGuessLabel to the given text.
-     * @param text the text to set the label to
-     */
-    public void setComputerGuessLabel(String text) {
-        computerGuessLabel.setText(text);
-    }
-
-    /**
-     * Resets the game by resetting the game logic and restoring the game scene.
-     * 
-     * @param primaryStage the primary stage of the application
-     * @param cameraController the camera controller used in the game
-     */
-    public void resetGame(Stage primaryStage, CameraController cameraController) {
-        // Reset the game logic
-        GameLogic.resetGame();
-
-        // Restore the game scene
-        Scene mainScene = createMainScene(cameraController);
-        primaryStage.setScene(mainScene);
-    }
-
-    /**
-     * Returns a Scene object that displays a message indicating that the computer has guessed the correct number.
-     * 
-     * @param correctNumber The correct number that the computer has guessed.
-     * @param primaryStage The primary stage of the JavaFX application.
-     * @param cameraController The CameraController object used to control the camera in the 3D scene.
-     * @return A Scene object that displays a message indicating that the computer has guessed the correct number.
-     */
-    public Scene correctGuessScene(int correctNumber, Stage primaryStage, CameraController cameraController) {
-        // Sets the action for when the play again button is clicked
-        createPlayAgainButtonAction(primaryStage, cameraController);
-
-        VBox layout = new VBox(20);
-        layout.setAlignment(Pos.CENTER);
-
-        Label correctNumberLabel = new Label("Correct Number: " + correctNumber);
-        Label successMessage = new Label("The computer guessed the number!");
-
-        layout.getChildren().addAll(correctNumberLabel, successMessage, playAgainButton, exitButton);
-
-        Scene correctGuessScene = new Scene(layout, 600, 750);
-        correctGuessScene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-
-        return correctGuessScene;
+    public void setFirstCaptureFalse() {
+        this.firstCapture = false;
     }
 
     /**
@@ -198,10 +139,39 @@ public class MainScene {
         });
     }
 
-    private void createPlayAgainButtonAction(Stage primaryStage, CameraController cameraController) {
-        playAgainButton.setOnAction(event -> {
-            resetGame(primaryStage, cameraController);
-        });
+    /**
+     * Displays the predicted user response on the UI.
+     * 
+     * @param predictedClass The predicted class of the user response.
+     * @param predictedScore The predicted score of the user response.
+     */
+    public void showUserResponse(String predictedClass, double predictedScore) {
+        // Hide the loading animation
+        cameraLoading.hideLoadingAnimation(rootLayout, cameraView);
+
+        // Update the label to prompt the user to think of a number
+        promptLabel.setText("Higher, Lower, or Correct?");
+        
+        // Get the predicted class without the leading number
+        String user = predictedClass.substring(predictedClass.indexOf(" ") + 1);
+
+        // Convert the predicted score to an integer percentage
+        int percentage = (int)(predictedScore * 100);
+
+        // Create a String with the predicted class and confidence score
+        String userResult = "User: " + user + " (" + percentage + "% Confidence)";
+
+        // Update the predictionLabel to show the user's response and score
+        Platform.runLater(() -> predictionLabel.setText(userResult));
+    }
+
+    /**
+     * Displays the computer's guess on the computerGuessLabel.
+     * 
+     * @param computerGuess the computer's guess to be displayed
+     */
+    public void showComputerResponse(String computerGuess) {
+        computerGuessLabel.setText(computerGuess);
     }
 
     /**

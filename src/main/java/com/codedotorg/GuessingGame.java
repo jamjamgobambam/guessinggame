@@ -5,8 +5,8 @@ import com.codedotorg.modelmanager.ModelManager;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -18,56 +18,80 @@ public class GuessingGame {
     /** The main scene of the app to display the game */
     private MainScene game;
 
+    /** The GameOverScene to display the winner */
+    private GameOverScene gameOver;
+
+    /** The GameLogic to handle the game logic */
+    private GameLogic logic;
+
     /** Manages the TensorFlow model used for image classification */
     private ModelManager model;
 
     /** Controls the camera capture and provides frames to the TensorFlow model for classification */
     private CameraController cameraController;
 
+    /** The Timeline to manage how often a prediction is made */
+    private Timeline timeline;
+
     /**
      * Constructor for the GuessingGame class.
-     * Initializes a new CameraController, ModelManager, and MainScene.
+     * Sets up the window using the primaryStage, initializes the model
+     * and camera capture, sets up the game scenes and logic.
+     *
+     * @param primaryStage the primary stage for the application
      */
-    public GuessingGame() {
+    public GuessingGame(Stage primaryStage) {
+        // Set up the window using the primaryStage
+        setUpWindow(primaryStage);
+
+        // Set up the model and camera capture
         cameraController = new CameraController();
         model = new ModelManager();
+        
+        // Set up the game scenes and logic
         game = new MainScene();
+        gameOver = new GameOverScene();
+        logic = new GameLogic();
     }
-    
+
     /**
-     * Starts the Guessing Game application.
-     * Sets the title of the primary stage to "Guessing Game".
-     * Adds a shutdown hook to stop the camera capture when the app is closed.
-     * Calls the showMainScreen() method to display the main screen.
+     * Sets up the window with the given primaryStage, sets the title of
+     * the window to "Guessing Game", and adds a shutdown hook to stop
+     * the camera capture when the app is closed.
      *
      * @param primaryStage the primary stage of the application
      */
-    public void startApp(Stage primaryStage) {
-        this.window = primaryStage;
+    public void setUpWindow(Stage primaryStage) {
+        // Set window to point to the primaryStage
+        window = primaryStage;
+
+        // Set the title of the window
         window.setTitle("Guessing Game");
 
         // Shutdown hook to stop the camera capture when the app is closed
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             cameraController.stopCapture();
         }));
-
-        showMainScreen();
     }
-
     
     /**
-     * Displays the main screen of the game, which includes the camera view
-     * and the computer's guess. Calls createMainScreen() to create the main
-     * screen to show, sets the scene to the window and shows it. Starts
-     * capturing the webcam, initially hides the camera view and shows the
-     * loading animation. Updates the prediction and computer's guess.
+     * Starts a new guessing game by loading the main
+     * screen and updating the game state.
      */
-    public void showMainScreen() {
-        // Create a new Scene object
-        Scene mainScene = game.createMainScene(cameraController);
+    public void playGame() {
+        loadMainScreen();
+        updateGame();
+    }
 
-        // Set mainScene as the active scene in the window
-        window.setScene(mainScene);
+    /**
+     * Loads the main screen of the game, setting it to starting defaults
+     * and displaying the window. Captures the camera view and sets the model
+     * for the cameraController object. Retrieves the Loading object and
+     * shows the loading animation while the camera is loading.
+     */
+    public void loadMainScreen() {
+        // Set the game to starting defaults
+        resetGame();
 
         // Display the window
         window.show();
@@ -80,43 +104,38 @@ public class GuessingGame {
 
         // Show the loading animation while the camera is loading
         cameraLoading.showLoadingAnimation(game.getCameraView());
-
-        // Update the game results
-        updateGameResults();
     }
 
     /**
-     * Updates the game results by getting the predicted class and score
-     * from the CameraController, removing the loading animation and
-     * showing the camera view, updating the label to prompt the user to
-     * think of a number, getting the result of the user's response, updating
-     * the prediction label with the predicted class and confidence score,
-     * and updating the computer guess label.
+     * Updates the game by getting the predicted class and score from the CameraController,
+     * showing the user's response and confidence score in the app, getting the result of the
+     * computer's guess, and ending the game if the guess is correct. If the guess is incorrect,
+     * the computer's guess is displayed in the app.
      */
-    private void updateGameResults() {
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
+    private void updateGame() {
+        timeline = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
             // Get the predicted class and score from the CameraController
             String predictedClass = cameraController.getPredictedClass();
             double predictedScore = cameraController.getPredictedScore();
 
             if (predictedClass != null) {
-                // Retrieve the Loading object
-                Loading cameraLoading = game.getLoadingAnimation();
+                // Show the user's response and confidence score in the app
+                game.showUserResponse(predictedClass, predictedScore);
 
-                // Remove the loading animation and show the camera view
-                cameraLoading.hideLoadingAnimation(game.getRootLayout(), game.getCameraView());
+                // Get the result of the computer's guess
+                int result = logic.binarySearch(predictedClass);
 
-                // Update the label to prompt the user to think of a number
-                game.setPromptLabelText("Higher, Lower, or Correct?");
+                // End the game if the guess is correct
+                if (logic.isGuessCorrect(predictedClass)) {
+                    loadGameOver(result);
+                }
+                else {
+                    // Create a String with the computer's guess
+                    String computerGuess = "Computer Guess: " + result;
 
-                // Get the result of the user's response
-                String userResult = GameLogic.getUserResponse(predictedClass, predictedScore);
-
-                // Update the prediction label with the predicted class and confidence score
-                Platform.runLater(() -> game.setPredictionLabelText(userResult));
-
-                // Update the label with the computer's guess
-                updateComputerGuessLabel(predictedClass);
+                    // Update the computer guess label with the number the computer guessed
+                    game.showComputerResponse(computerGuess);
+                }
             }
         }));
         
@@ -128,25 +147,48 @@ public class GuessingGame {
     }
 
     /**
-     * Updates the computer guess label with the result
-     * of a binary search on the predicted class.
+     * Loads the Game Over scene with the winner's name and sets the
+     * playAgainButton to reset the game when clicked. Stops the timeline.
      *
-     * @param predictedClass the predicted class to search for
+     * @param winner the name of the winner of the game
      */
-    private void updateComputerGuessLabel(String predictedClass) {
-        // Get the result of the computer's guess
-        int result = GameLogic.binarySearch(predictedClass);
+    public void loadGameOver(int number) {
+        // Retrieve the playAgainButton from the GameOverScene
+        Button playAgainButton = gameOver.getPlayAgainButton();
 
-        // End the game if the guess is correct
-        if (GameLogic.isGuessCorrect(predictedClass)) {
-            window.setScene(game.correctGuessScene(result, window, cameraController));
-        }
-        else {
-            // Create a String with the computer's guess
-            String computerGuess = "Computer Guess: " + result;
+        // Set the playAgainButton to reset the game when clicked
+        playAgainButton.setOnAction(event -> {
+            resetGame();
+        });
 
-            // Update the computer guess label with the number the computer guessed
-            Platform.runLater(() -> game.setComputerGuessLabel(computerGuess));
+        // Create the GameOverScene layout
+        Scene gameOverScene = gameOver.createGameOverScene(number, cameraController);
+
+        // Set the GameOverScene in the window
+        window.setScene(gameOverScene);
+
+        // Stop the timeline
+        timeline.stop();
+    }
+
+    /**
+     * Resets the game by resetting the game logic, creating a new main scene,
+     * and setting the window to display the new scene. If a timeline is currently
+     * running, it is resumed.
+     */
+    public void resetGame() {
+        // Reset the GameLogic
+        logic.resetLogic();
+
+        // Create the MainScene for the game
+        Scene mainScene = game.createMainScene(cameraController);
+
+        // Set the MainScene in the window
+        window.setScene(mainScene);
+        
+        // Play the timeline if it is not null
+        if (timeline != null) {
+            timeline.play();
         }
     }
 
